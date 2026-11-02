@@ -5,12 +5,16 @@ on:
     types: [opened, reopened, edited, synchronize]
 
 permissions:
+  contents: read
   pull-requests: write
 
 jobs:
   ajouterunlabel:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout le repository
+        uses: actions/checkout@v7
+
       - name: Créer un workflow qui ajoute un label bigdiff si le nombre de lignes modifiées par la PR dépasse les 1000 lignes
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
