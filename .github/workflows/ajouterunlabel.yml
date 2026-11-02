@@ -14,8 +14,10 @@ jobs:
       - name: Créer un workflow qui ajoute un label bigdiff si le nombre de lignes modifiées par la PR dépasse les 1000 lignes
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ADDITIONS: ${{ github.event.pull_request.additions }}
+          DELETIONS: ${{ github.event.pull_request.deletions }}
         run: |
-          TOTAL=$(({{ github.event.pull_request.additions }} + {{ github.event.pull_request.deletions }}))
+          TOTAL=$((ADDITIONS + DELETIONS}}))
           if [ $TOTAL -gt 1000 ]; then
             gh pr edit ${{ github.event.pull_request.number }} --add-label bigdiff
           fi
