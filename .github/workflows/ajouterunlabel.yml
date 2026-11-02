@@ -17,7 +17,7 @@ jobs:
           ADDITIONS: ${{ github.event.pull_request.additions }}
           DELETIONS: ${{ github.event.pull_request.deletions }}
         run: |
-          TOTAL=$((ADDITIONS + DELETIONS}}))
+          TOTAL=$((ADDITIONS + DELETIONS))
           if [ $TOTAL -gt 1000 ]; then
             gh pr edit ${{ github.event.pull_request.number }} --add-label bigdiff
           fi
