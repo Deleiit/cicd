@@ -2,7 +2,7 @@ name: Commentaire dans une PR
 
 on:
   pull_request:
-    # types: [opened, reopened, edited, synchronize]
+    types: [opened, reopened, edited, synchronize]
 
 permissions:
   contents: read
@@ -19,7 +19,7 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Ajouter ls -lrath
-        uses: ls -lrath
+        run: ls -lrath
 
       - name: Publier le README.md du repository comme commentaire sur la PR qui a déclenché le workflow
         env:
