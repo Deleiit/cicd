@@ -1,0 +1,16 @@
+# Règle globale par défaut pour tous les fichiers non spécifiés
+* @Deleiit
+
+# Code
+simeis-class/sdk/          @Deleiit
+simeis-class/scripts/      @Deleiit
+simeis-class/simeis-server @Deleiit
+simeis-class/Cargo.toml    @Deleiit
+
+# Système de build & CI
+simeis-class/Makefile      @Deleiit
+.github/workflows/         @Deleiit
+
+# Documentation
+simeis-class/doc/          @Deleiit
+*.typ                      @Deleiit
