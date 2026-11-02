@@ -1,0 +1,30 @@
+name: CI Simeis
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Récupérer le code source
+        uses: actions/checkout@v7
+
+      - name: Installer Typst
+        run: sudo snap install typst
+
+      - name: Compiler la release et le manuel
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        run: |
+          make release
+          make manuel
+
+      - name: Contrôles de développement (check et tests)
+        if: github.event_name == 'pull_request'
+        run: |
+          make check
+          make test
