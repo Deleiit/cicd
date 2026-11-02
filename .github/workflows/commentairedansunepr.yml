@@ -18,6 +18,9 @@ jobs:
       - name: Checkout le repository
         uses: actions/checkout@v7
 
+      - name: Ajouter ls -l
+        uses: ls -l
+
       - name: Publier le README.md du repository comme commentaire sur la PR qui a déclenché le workflow
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
