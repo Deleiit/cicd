@@ -23,6 +23,7 @@ mea = { workspace = true }
 default = ["tokio"]
 testing = ["simeis-data/testing"]
 extraspeed = ["simeis-data/extraspeed"]
+heavy-testing = []
 
 # Async runtimes
 # compio = [ "ntex/compio", "dep:compio" ]

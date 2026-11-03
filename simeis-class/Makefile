@@ -28,10 +28,10 @@ test:
 	cargo test
 
 anothertest:
-	cargo test --features heavy-testing
+	cargo test -p simeis-server --features heavy-testing
 
 anotherbuild:
-	cargo build --features heavy-testing
+	cargo build -p simeis-server --features heavy-testing
 
 # Permet de supprimer tous les fichiers compilés/exécutables lors de 'make release' ou 'make build'
 clean:
