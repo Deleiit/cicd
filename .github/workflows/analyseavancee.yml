@@ -1,0 +1,38 @@
+name: Analyse avancée
+
+on:
+  push:
+    branches:
+      - 'release/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: simeis-class
+
+    steps:
+      - name: Récupérer le code source
+        uses: actions/checkout@v7
+
+      - name: Tests unitaires
+        run: make anothertest
+
+      - name: Compilation debug
+        run: make anotherbuild
+
+      - name: Test fonctionnel python
+        run: python3 verif.py
+
+      - name: Audit de sécurité
+        run: |
+          cargo install cargo-audit --locked
+          make audit
+
+      - name: Vérifier les dépendances inutilisées
+        run: |
+          rustup toolchain install nightly --profile minimal
+          cargo install cargo-udeps --locked
+          make udeps

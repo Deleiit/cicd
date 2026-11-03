@@ -27,6 +27,18 @@ fmt:
 test:
 	cargo test
 
+anothertest:
+	cargo test --features heavy-testing
+
+anotherbuild:
+	cargo build --features heavy-testing
+
 # Permet de supprimer tous les fichiers compilés/exécutables lors de 'make release' ou 'make build'
 clean:
 	cargo clean
+
+audit:
+	cargo audit
+
+udeps:
+	cargo +nightly udeps
