@@ -33,4 +33,4 @@ jobs:
 
       - name: Vérifier le formatage des scripts Python
         run: |
-          black --check simeis-class/
+          black --check
