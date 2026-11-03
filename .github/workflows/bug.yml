@@ -28,5 +28,9 @@ jobs:
           make fmt
           make test
       
-      - name: Vérifier que python existe
-        run: pip --version
+      - name: Installer l'outil de formatage
+        run: pip install black
+
+      - name: Vérifier le formatage des scripts Python
+        run: |
+          black --check simeis-class/
