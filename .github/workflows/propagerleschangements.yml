@@ -1,0 +1,29 @@
+name: Propager les changements
+
+on:
+  pull_request:
+    types:
+      - closed
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  propagerleschangements:
+    if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'bug/')
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: simeis-class
+
+    steps:
+      - name: Récupérer le code source
+        uses: actions/checkout@v7
+
+      - name: Vérifier si la PR avait un label du type propagate:release/x
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          
