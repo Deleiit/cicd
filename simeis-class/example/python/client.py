@@ -2,6 +2,7 @@ import sys
 import time
 from sdk import SimeisSDK
 
+
 # En fonction de la densité de resources disponible sur la planète
 # On choisi un module plutôt qu'un autre
 def decide_mod_to_buy(planet):
@@ -19,6 +20,7 @@ def decide_mod_to_buy(planet):
     # More gas -> gas_sucker
     else:
         return "gas_sucker"
+
 
 class Game:
     def __init__(self, username, ip, port):
@@ -72,9 +74,13 @@ class Game:
         while True:
             status = self.sdk.get_player_status()
             print(status)
-            print("Current status: {} credits, costs: {}, time left before lost: {} secs".format(
-                round(status["money"], 2), round(status["costs"], 2), int(status["money"] / status["costs"]),
-            ))
+            print(
+                "Current status: {} credits, costs: {}, time left before lost: {} secs".format(
+                    round(status["money"], 2),
+                    round(status["costs"], 2),
+                    int(status["money"] / status["costs"]),
+                )
+            )
             if status["money"] <= 0:
                 print("You lost")
                 return
@@ -107,28 +113,55 @@ class Game:
             # On vends tout
             cycletot = 0
             for res, amnt in self.sdk.get_station_resources(sta).items():
-                if res in [ "fuel", "hull" ]:
+                if res in ["fuel", "hull"]:
                     continue
                 got = self.sdk.sell_resource(sta, res, amnt)
-                print("Sold", amnt, "of", res, "for", got["added_money"], "credits (fees", got["fees"], "credits)")
+                print(
+                    "Sold",
+                    amnt,
+                    "of",
+                    res,
+                    "for",
+                    got["added_money"],
+                    "credits (fees",
+                    got["fees"],
+                    "credits)",
+                )
                 cycletot += got["added_money"]
 
             # On achète du carburant et on fait le plein
             got = self.sdk.buy_fuel_for_refuel(sta, ship["id"])
             cycletot -= got["removed_money"]
-            print("Bought", got["added_cargo"], "of Fuel for", got["removed_money"], "credits (fees", got["fees"], "credits)")
+            print(
+                "Bought",
+                got["added_cargo"],
+                "of Fuel for",
+                got["removed_money"],
+                "credits (fees",
+                got["fees"],
+                "credits)",
+            )
             self.sdk.refuel_ship(sta, ship["id"])
 
             # On achète des plaques de coque, et on répare la coque
             got = self.sdk.buy_hull_for_repair(sta, ship["id"])
             cycletot -= got["removed_money"]
-            print("Bought", got["added_cargo"], "of Hull for", got["removed_money"], "credits (fees", got["fees"], "credits)")
+            print(
+                "Bought",
+                got["added_cargo"],
+                "of Hull for",
+                got["removed_money"],
+                "credits (fees",
+                got["fees"],
+                "credits)",
+            )
             self.sdk.repair_ship(sta, ship["id"])
 
             # Rebelotte
             print("Total this cycle:", cycletot)
             assert cycletot > 0
             print("")
+
 
 if __name__ == "__main__":
     if len(sys.argv[1:]) < 3:

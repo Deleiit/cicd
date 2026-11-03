@@ -6,16 +6,20 @@ import json
 import string
 import urllib.request
 
+
 class SimeisError(Exception):
     pass
 
+
 def get_dist(a, b):
-    return math.sqrt(((a[0]-b[0]) ** 2) + ((a[1]-b[1]) ** 2) + ((a[2]-b[2]) ** 2))
+    return math.sqrt(((a[0] - b[0]) ** 2) + ((a[1] - b[1]) ** 2) + ((a[2] - b[2]) ** 2))
+
 
 # Check if types are present in the list
 def check_has(alld, key, *req):
     alltypes = [c[key] for c in alld.values()]
     return all([k in alltypes for k in req])
+
 
 class SimeisSDK:
     def __init__(self, username, ip, port, debug=False):
@@ -38,9 +42,9 @@ class SimeisSDK:
         tail = ""
         if len(qry) > 0:
             tail += "?"
-            tail += "&".join([
-                "{}={}".format(k, urllib.parse.quote(v)) for k, v in qry.items()
-            ])
+            tail += "&".join(
+                ["{}={}".format(k, urllib.parse.quote(v)) for k, v in qry.items()]
+            )
 
         qry = f"{self.url}{path}{tail}"
 
@@ -66,19 +70,21 @@ class SimeisSDK:
 
     def post(self, *args, body=None, **kwargs):
         return self.api(*args, method="POST", body=body, **kwargs)
-        
+
     # If we have a file containing the player ID and key, use it
     # If not, create a new player
     # If the player has lost, print an error message
     def setup_player(self, username, force_register=False):
         # Sanitize the username, remove any symbols
-        username = "".join([c for c in username if c in string.ascii_letters + string.digits]).lower()
+        username = "".join(
+            [c for c in username if c in string.ascii_letters + string.digits]
+        ).lower()
 
         # If we don't have any existing account
         if force_register or not os.path.isfile(f"./{username}.json"):
             player = self.post(f"/player/new/{username}")
             with open(f"./{username}.json", "w") as f:
-                json.dump(player, f, indent=2)       
+                json.dump(player, f, indent=2)
             self.player = player
 
         # If an account already exists
@@ -99,7 +105,9 @@ class SimeisSDK:
         # If the player already failed, we must reset the server
         # Or recreate an account with a new nickname
         if player["money"] <= 0.0:
-            print("!!! Player already lost, please restart the server to reset the game")
+            print(
+                "!!! Player already lost, please restart the server to reset the game"
+            )
             sys.exit(0)
 
     def ping(self):
@@ -120,7 +128,7 @@ class SimeisSDK:
 
     def shop_list_ship(self, sta):
         all = self.get(f"/station/{sta}/shipyard/list")["ships"]
-        return sorted(all, key = lambda ship: ship["price"])
+        return sorted(all, key=lambda ship: ship["price"])
 
     def buy_ship(self, sta, shipid):
         return self.post(f"/station/{sta}/shipyard/buy/{shipid}")
@@ -135,7 +143,9 @@ class SimeisSDK:
         return self.post(f"/station/{sta}/crew/fire/{crew_id}")
 
     def assign_crew_to_ship(self, sta, shipid, operator_id, role):
-        return self.post(f"/station/{sta}/crew/assign/{operator_id}/ship/{shipid}/{role}")
+        return self.post(
+            f"/station/{sta}/crew/assign/{operator_id}/ship/{shipid}/{role}"
+        )
 
     def station_has_trader(self, sta):
         station = self.get(f"/station/{sta}")
@@ -145,12 +155,15 @@ class SimeisSDK:
         return self.post(f"/station/{sta}/crew/assign/{trader_id}/trading")
 
     def compute_travel_cost(self, origin, destination, ship_stats, cargo_usage_perc):
-        return self.post(f"/calc/navigation", body={
-            "origin": origin,
-            "dest": destination,
-            "ship_stats":  ship_stats,
-            "cargo_usage_perc": cargo_usage_perc,
-        })
+        return self.post(
+            f"/calc/navigation",
+            body={
+                "origin": origin,
+                "dest": destination,
+                "ship_stats": ship_stats,
+                "cargo_usage_perc": cargo_usage_perc,
+            },
+        )
 
     def travel(self, ship_id, position, wait_end=True):
         x, y, z = position
@@ -229,7 +242,7 @@ class SimeisSDK:
 
         cargo = self.get(f"/station/{sta}")["cargo"]
         if "fuel" not in cargo["resources"]:
-            cargo["resources"]["fuel"] = 0        
+            cargo["resources"]["fuel"] = 0
 
         if cargo["resources"]["fuel"] > 0:
             return self.post(f"/station/{sta}/refuel/{ship_id}")
@@ -238,8 +251,8 @@ class SimeisSDK:
     def scan_planets(self, sta):
         station = self.get(f"/station/{sta}")
         planets = self.post(f"/station/{sta}/scan")["planets"]
-        return  sorted(planets,
-            key=lambda pla: get_dist(station["position"], pla["position"])
+        return sorted(
+            planets, key=lambda pla: get_dist(station["position"], pla["position"])
         )
 
     def start_extraction(self, ship_id):
@@ -312,27 +325,45 @@ class SimeisSDK:
         return self.post(f"/station/{sta}/shipyard/upgrade/{ship_id}/{upgtype}")
 
     def buy_ship_expansion(self, sta, ship_id, exptype, n):
-        return self.post(f"/station/{sta}/shipyard/upgrade/{ship_id}/expand/{exptype}/{n}")
+        return self.post(
+            f"/station/{sta}/shipyard/upgrade/{ship_id}/expand/{exptype}/{n}"
+        )
 
     def compute_mining_rate(self, modtype, modrank, oprank, planet, power_attr={}):
-        return  self.post("/calc/mining_rate", body={
-            "module_type": modtype,
-            "module_rank": modrank,
-            "operator_rank": oprank,
-            "planet_coord": planet,
-            "power_attribution": power_attr,
-        })
+        return self.post(
+            "/calc/mining_rate",
+            body={
+                "module_type": modtype,
+                "module_rank": modrank,
+                "operator_rank": oprank,
+                "planet_coord": planet,
+                "power_attribution": power_attr,
+            },
+        )
 
     def compute_ship_mining_rate(self, ship_id, planet, power_attr={}):
-        return  self.post(f"/calc/mining_rate/{ship_id}", body={
-            "module_type": modtype,
-            "module_rank": modrank,
-            "operator_rank": oprank,
-            "planet_coord": planet,
-            "power_attribution": power_attr,
-        })
+        return self.post(
+            f"/calc/mining_rate/{ship_id}",
+            body={
+                "module_type": modtype,
+                "module_rank": modrank,
+                "operator_rank": oprank,
+                "planet_coord": planet,
+                "power_attribution": power_attr,
+            },
+        )
 
-    def compute_upgrade_ship(self, start_reactor, start_shield, start_pilot, start_cargo_capacity, end_reactor=None, end_shield=None, end_pilot=None, end_cargo_capacity=None):
+    def compute_upgrade_ship(
+        self,
+        start_reactor,
+        start_shield,
+        start_pilot,
+        start_cargo_capacity,
+        end_reactor=None,
+        end_shield=None,
+        end_pilot=None,
+        end_cargo_capacity=None,
+    ):
         if end_reactor is None:
             end_reactor = start_reactor
         if end_shield is None:
@@ -341,35 +372,51 @@ class SimeisSDK:
             end_pilot = start_pilot
         if end_cargo_capacity is None:
             end_cargo_capacity = start_cargo_capacity
-        return self.post("/calc/upgrade/ship", body={
-            "start_reactor_rank": start_reactor,
-            "end_reactor_rank": end_reactor,
-            "start_shield_rank": start_shield,
-            "end_shield_rank": end_shield,
-            "start_pilot_rank": start_pilot,
-            "end_pilot_rank": end_pilot,
-            "start_cargo_capacity": start_cargo_capacity,
-            "end_cargo_capacity": end_cargo_capacity,
-        })
+        return self.post(
+            "/calc/upgrade/ship",
+            body={
+                "start_reactor_rank": start_reactor,
+                "end_reactor_rank": end_reactor,
+                "start_shield_rank": start_shield,
+                "end_shield_rank": end_shield,
+                "start_pilot_rank": start_pilot,
+                "end_pilot_rank": end_pilot,
+                "start_cargo_capacity": start_cargo_capacity,
+                "end_cargo_capacity": end_cargo_capacity,
+            },
+        )
 
-    def compute_upgrade_module(self, modtype, mod_start_rank, crew_start_rank, mod_end_rank=None, crew_end_rank=None):
+    def compute_upgrade_module(
+        self,
+        modtype,
+        mod_start_rank,
+        crew_start_rank,
+        mod_end_rank=None,
+        crew_end_rank=None,
+    ):
         if mod_end_rank is None:
             mod_end_rank = mod_start_rank
         if crew_end_rank is None:
             crew_end_rank = crew_start_rank
-        return self.post("/calc/upgrade/module", body={
-            "module_type": modtype,
-            "module_start_rank": mod_start_rank,
-            "module_end_rank": mod_end_rank,
-            "crew_start_rank": crew_start_rank,
-            "crew_end_rank": crew_end_rank,
-        })
+        return self.post(
+            "/calc/upgrade/module",
+            body={
+                "module_type": modtype,
+                "module_start_rank": mod_start_rank,
+                "module_end_rank": mod_end_rank,
+                "crew_start_rank": crew_start_rank,
+                "crew_end_rank": crew_end_rank,
+            },
+        )
 
     def compute_upgrade_trader(self, start, end):
-        return self.post("/calc/upgrade/trader", body={
-            "trader_start_rank": start,
-            "trader_end_rank": end,
-        })
+        return self.post(
+            "/calc/upgrade/trader",
+            body={
+                "trader_start_rank": start,
+                "trader_end_rank": end,
+            },
+        )
 
     def game_version(self):
         return self.get("/version")
@@ -423,10 +470,13 @@ class SimeisSDK:
         if pilot_rank is None:
             return self.post("/calc/wages/ship", body={"operator_ranks": opranks})
         else:
-            return self.post("/calc/wages/ship", body={
-                "operator_ranks": opranks,
-                "pilot_rank": pilot_rank,
-            })
+            return self.post(
+                "/calc/wages/ship",
+                body={
+                    "operator_ranks": opranks,
+                    "pilot_rank": pilot_rank,
+                },
+            )
 
     def get_player_history(self):
         return self.get("/player/history")

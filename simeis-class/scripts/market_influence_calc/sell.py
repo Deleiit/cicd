@@ -30,29 +30,38 @@ EXPECTED = {
 }
 
 NPARAMS = 6
-BOUNDS=[(0.0001, 2.0) for _ in range(NPARAMS)]
+BOUNDS = [(0.0001, 2.0) for _ in range(NPARAMS)]
 X0 = []
-for (mn, mx) in BOUNDS: 
+for mn, mx in BOUNDS:
     X0.append((mx + mn) / 2.0)
-X0 = [0.02578237202951275, 0.5554258819004403, 1.9919988458913422, 0.0018077576687068689, 0.010908391555243003, 0.002494236546541542]
+X0 = [
+    0.02578237202951275,
+    0.5554258819004403,
+    1.9919988458913422,
+    0.0018077576687068689,
+    0.010908391555243003,
+    0.002494236546541542,
+]
+
 
 # AMNT +++ -> INFL +++
 # PRIX +++ -> INFL +++
 def f(amnt, price, *params):
     assert not any([np.isnan(p) for p in params])
     a, b, c, d, e, f = params
-    
+
     norm_amnt = amnt / 1000.0
     norm_price = price / 100.0
-    
+
     safe_amnt = max(norm_amnt, 1e-6)
     safe_price = max(norm_price, 1e-6)
-    
+
     # Modèle à loi de puissance combinée garantissant une croissance monotone
-    base = a * (safe_amnt ** b) * (safe_price ** c)
-    multiplier = 1.0 + d * (safe_amnt ** e) * (safe_price ** f)
-    
+    base = a * (safe_amnt**b) * (safe_price**c)
+    multiplier = 1.0 + d * (safe_amnt**e) * (safe_price**f)
+
     return base * multiplier
+
 
 def fit_parameters(expected_data):
     points = []
@@ -89,9 +98,10 @@ def fit_parameters(expected_data):
     print(res.status, res.message, res.nit)
     return res.x
 
+
 params = fit_parameters(EXPECTED)
 print("Paramètres trouvés:", end="")
-for (n, p) in enumerate(params):
+for n, p in enumerate(params):
     char = chr(ord("a") + n)
     print(f"{char}={p} ", end="")
 print("")
@@ -101,8 +111,12 @@ try:
         for price, (startr, endr) in data.items():
             infl = f(amnt, price, *params)
             infls = round(infl * 100, 2)
-            assert infl >= startr / 100.0, f"Amnt {amnt} price {price}%, influence {infls}% < min {startr}%"
-            assert infl <= endr / 100.0, f"Amnt {amnt} price {price}%, influence {infls}% > max {endr}%"
+            assert (
+                infl >= startr / 100.0
+            ), f"Amnt {amnt} price {price}%, influence {infls}% < min {startr}%"
+            assert (
+                infl <= endr / 100.0
+            ), f"Amnt {amnt} price {price}%, influence {infls}% > max {endr}%"
             print(f"* {amnt}\t{price}:\t{infls}%\tOK")
 except AssertionError as err:
     print(f"Basic assertion failed: {err}")
@@ -126,15 +140,19 @@ while True:
         seed = int(random.random() * 100000000000000000)
 
     max_exp = max(EXPECTED.keys())
-    amnt = (0.5 + (random.random()/2)) * random.randrange(20, int(max_exp * 1.1))
+    amnt = (0.5 + (random.random() / 2)) * random.randrange(20, int(max_exp * 1.1))
     currp = (random.random() + 0.5) * 100
     try:
         infl = f(amnt, price, *params)
         assert infl < 1, "Influence < 1"
         assert infl >= 0, "Influence >= 0"
         if infl < MAX_INFLUENCE / 100:
-            assert f(amnt, price, *params) < f(amnt * 1.1, price, *params), "Influence increase when amnt increase"
-            assert f(amnt, price * 0.9, *params) < f(amnt, price * 1.1, *params), "Influence increase when price increase"
+            assert f(amnt, price, *params) < f(
+                amnt * 1.1, price, *params
+            ), "Influence increase when amnt increase"
+            assert f(amnt, price * 0.9, *params) < f(
+                amnt, price * 1.1, *params
+            ), "Influence increase when price increase"
     except AssertionError as err:
         print(f"{n}| Seed {seed} failed: {err}")
         print(f"\tPrice      {currp}")
