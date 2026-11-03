@@ -1,0 +1,32 @@
+name: Branche bug
+
+on:
+  push:
+    branches:
+      - bug/*
+  pull_request:
+    branches:
+      - bug/*
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: simeis-class
+
+    steps:
+      - name: Récupérer le code source
+        uses: actions/checkout@v7
+
+      - name: Contrôles de développement (check et tests)
+        if: github.event_name == 'pull_request'
+        run: |
+          make check
+          make clippy
+          make fmt
+          make test
+      
+      - name: Vérifier que python existe
+        run: pip --version

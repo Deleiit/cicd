@@ -11,9 +11,17 @@ release:
 manuel:
 	typst compile doc/manual.typ doc/manual.pdf
 
-# Permet de vérifier la qualité du code
+# Permet de vérifier la qualité du code pré-compilation
 check:
 	cargo check
+
+# Permet de vérifier que de mauvais schémas ne sont pas détectés
+clippy:
+	cargo clippy
+
+# Permet de formater le code
+fmt:
+	cargo fmt --check
 
 # Permet de tester le code unitairement
 test:
